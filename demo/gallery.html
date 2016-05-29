@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>swipe-action gallery demo</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="msapplication-TileColor" content="#000000">
+  <meta name="theme-color" content="#000000">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
+  <link rel="import" href="../swipe-action.html">
+
+  <style is="custom-style">
+    body {
+      font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #000000;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    #images-container {
+      @apply(--layout-fit);
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: -ms-autohiding-scrollbar;
+    }
+
+    swipe-action {
+      height: 250px;
+      min-width: 333px;
+      margin: 0 32px;
+      transition: all 500ms;
+      @apply(--layout-self-center);
+    }
+
+    swipe-action[is-swiped-away] {
+      min-width: 0;
+      margin: 0 0;
+    }
+
+    img {
+      height: 250px;
+    }
+  </style>
+</head>
+
+<body unresolved>
+
+  <template is="dom-bind" id="demo">
+
+    <div id="images-container">
+      <template is="dom-repeat" items="{{images}}">
+        <swipe-action scroll-direction="x" on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled">
+
+          <!-- Actual image -->
+          <img src="../res/rotheneuf.jpg" alt="Les rochers sculptés de Rothéneuf" draggable="false">
+
+           <!-- Swipe up and down action -->
+          <div swipe-up-action swipe-down-action swipe-fade></div>
+
+        </swipe-action>
+      </template>
+    </div>
+
+  </template>
+
+  <script>
+    function createImages(imageCount) {
+      var images = [];
+      for (var i=0; i<imageCount; i++) {
+        images.push({'id':i});
+      }
+      return images;
+    }
+
+    var demo = document.querySelector('#demo');
+    demo.images = createImages(10);
+
+    demo.onSwipedAway = function(e) {
+      console.log('Item ', e.model.item, ' has been swiped away to the ' + e.detail.action);
+    };
+
+    demo.onSwipeCanceled = function(e) {
+      console.log('Item ', e.model.item, '\'s ' + e.detail.action + ' swipe has been canceled');
+    };
+  </script>
+
+</body>
+</html>

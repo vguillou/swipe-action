@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>swipe-action demo</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="msapplication-TileColor" content="#ff5722">
+  <meta name="theme-color" content="#ff5722">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../../iron-icons/iron-icons.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
+  <link rel="import" href="../../iron-list/iron-list.html">
+  <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="../../paper-item/paper-icon-item.html">
+  <link rel="import" href="../../paper-item/paper-item-body.html">
+  <link rel="import" href="../../paper-material/paper-material.html">
+  <link rel="import" href="../../paper-ripple/paper-ripple.html">
+  <link rel="import" href="../../paper-styles/color.html">
+  <link rel="import" href="../../paper-styles/typography.html">
+  <link rel="import" href="../swipe-action.html">
+
+  <style is="custom-style" include="demo-pages-shared-styles">
+    body {
+      font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      background-color: #eee;
+    }
+
+    .vertical-section-container {
+      max-width: 700px;
+    }
+
+    .avatar {
+      display: inline-block;
+      box-sizing: border-box;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--paper-amber-500);
+    }
+
+    .horizontal.layout {
+      @apply(--layout-horizontal);
+    }
+
+    paper-icon-item {
+      background-color: white;
+    }
+
+
+    /* Common CSS */
+
+    swipe-action {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: default;
+    }
+
+    div[swipe-left-action],
+    div[swipe-right-action],
+    div[swipe-up-action],
+    div[swipe-down-action] {
+      color: white;
+      padding: 8px;
+      background-color: var(--paper-red-500);
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    div[swipe-left-action] {
+      padding-right: 16px;
+      @apply(--layout-end-justified);
+    }
+
+    div[swipe-right-action] {
+      padding-left: 16px;
+      background-color: var(--paper-green-500);
+    }
+
+    div[swipe-left-action][swipe-right-action] {
+      @apply(--layout-center-center);
+    }
+
+    div[swipe-up-action] {
+      background-color: var(--paper-blue-500);
+      @apply(--layout-end);
+      @apply(--layout-center-justified);
+    }
+
+    div[swipe-down-action] {
+      background-color: var(--paper-grey-500);
+      @apply(--layout-start);
+      @apply(--layout-center-justified);
+    }
+
+
+    /* Simplest example */
+
+    swipe-action.simple-example {
+      width: 130px;
+      height: 130px;
+      padding: 8px;
+      @apply(--layout-self-center);
+    }
+
+    .simple-example-swipe-target {
+      background-color: white;
+      @apply(--layout-fit);
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+    }
+
+
+    /* List example */
+
+    iron-list {
+      height: 400px;
+      max-width: 460px;
+      overflow-x: hidden !important;
+    }
+
+    swipe-action.list-item {
+      /* Items must be explicitely sized */ 
+      height: 72px;
+    }
+
+
+    /* Grid example */
+
+    #grid-example-container {
+      @apply(--layout-horizontal);
+      @apply(--layout-wrap);
+    }
+
+    swipe-action.square {
+      width: 130px;
+      height: 130px;
+      float: left;
+      margin: 4px;
+    }
+
+    swipe-action.square paper-material {
+      background-color: white;
+      @apply(--layout-fit);
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+    }
+
+  </style>
+</head>
+
+<body unresolved>
+
+  <div class="vertical-section-container centered">
+
+    <template is="dom-bind" id="demo">
+
+      <h3>Horizontal swipe only</h3>
+      <swipe-action class="simple-example" on-swiped-away="onSwipedAwaySimplestExample" on-swipe-canceled="onSwipeCanceledSimplestExample">
+        <!-- Actual item to be swiped -->
+        <paper-material class="simple-example-swipe-target">
+          Swipe me!
+        </paper-material>
+
+        <!-- Swipe action for left and right swipes -->
+        <div id='horizontal-action' swipe-left-action swipe-right-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+          <iron-icon icon="undo"></iron-icon>
+          <paper-ripple></paper-ripple>
+        </div>
+      </swipe-action>
+
+      <h3>A different action for every direction</h3>
+      <swipe-action class="simple-example" scroll-direction="none" on-swiped-away="onSwipedAwaySimplestExample" on-swipe-canceled="onSwipeCanceledSimplestExample">
+        <!-- Actual item to be swiped -->
+        <paper-material class="simple-example-swipe-target">
+          Swipe me!
+        </paper-material>
+
+        <!-- Swipe left action -->
+        <div id="all-direction-left-action" swipe-left-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+          Left swipe
+          <br/>
+          Tap to reset
+          <paper-ripple></paper-ripple>
+        </div>
+
+        <!-- Swipe right action -->
+        <div id="all-direction-right-action" swipe-right-action swipe-fade on-tap="onActionTaped">
+          Right swipe
+          <br/>
+          Tap to reset
+          <paper-ripple></paper-ripple>
+        </div>
+
+         <!-- Swipe up action -->
+        <div id="all-direction-up-action" swipe-up-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+          Up swipe
+          <br/>
+          Tap to reset
+          <paper-ripple></paper-ripple>
+        </div>
+
+        <!-- Swipe down action -->
+        <div id="all-direction-down-action" swipe-down-action swipe-fade on-tap="onActionTaped">
+          Down swipe
+          <br/>
+          Tap to reset
+          <paper-ripple></paper-ripple>
+        </div>
+      </swipe-action>
+
+      <h3>Swipe gesture disabled, triggered via buttons</h3>
+      <swipe-action class="simple-example" gesture-disabled on-swiped-away="onSwipedAwaySimplestExample" on-swipe-canceled="onSwipeCanceledSimplestExample">
+        <!-- Actual item to be swiped -->
+        <paper-material class="simple-example-swipe-target">
+          <p>Swipe me!</p>
+          <div class="horizontal layout">
+            <paper-icon-button icon="arrow-back" alt="trigger a left action without swiping" on-tap="onTriggerLeftActionWithoutSwipe"></paper-icon-button>
+            <paper-icon-button icon="arrow-forward" alt="trigger a right action without swiping" on-tap="onTriggerRightActionWithoutSwipe"></paper-icon-button>
+          </div>
+        </paper-material>
+
+        <!-- Swipe left action -->
+        <div id="all-direction-left-action" swipe-left-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+          Left swipe
+          <br/>
+          Tap to reset
+          <paper-ripple></paper-ripple>
+        </div>
+
+        <!-- Swipe right action -->
+        <div id="all-direction-right-action" swipe-right-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+          Right swipe
+          <br/>
+          Tap to reset
+          <paper-ripple></paper-ripple>
+        </div>
+      </swipe-action>
+
+      <h3>&lt;iron-list&gt;</h3>
+      <iron-list items="[[items]]">
+        <template strip-whitespace>
+          <swipe-action class="list-item" on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled" on-swipe-rubber-band-limit="onSwipeRubberBandMax" activated-action-id="{{item.activatedActionId}}">
+
+            <!-- Actual list item -->
+            <paper-icon-item>
+              <div class="avatar" item-icon></div>
+              <paper-item-body two-line>
+                <div>Photos [[item.id]]</div>
+                <div secondary>Jan 9, 2014</div>
+              </paper-item-body>
+              <paper-icon-button icon="arrow-back" alt="trigger a left action without swiping" on-tap="onTriggerLeftActionWithoutSwipe"></paper-icon-button>
+              <paper-icon-button icon="arrow-forward" alt="trigger a right action without swiping" on-tap="onTriggerRightActionWithoutSwipe"></paper-icon-button>
+            </paper-icon-item>
+
+            <!-- Swipe left action -->
+            <div id="list-left-action" swipe-left-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+              <iron-icon icon="delete"></iron-icon>
+              <paper-ripple></paper-ripple>
+            </div>
+
+            <!-- Swipe right action -->
+            <div id="list-right-action" swipe-right-action swipe-fade on-tap="onActionTaped">
+              <iron-icon icon="archive"></iron-icon>
+              <paper-ripple></paper-ripple>
+            </div>
+
+          </swipe-action>
+        </template>
+      </iron-list>
+
+      <h3>&lt;iron-list&gt; as grid demo</h3>
+      <iron-list grid items="[[items]]">
+        <template strip-whitespace>
+          <swipe-action class="square" on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled" on-swipe-rubber-band-limit="onSwipeRubberBandMax" activated-action-id="{{item.activatedActionId}}">
+
+            <!-- Actual list item -->
+            <paper-material class="item" elevation="0">
+              <div class="avatar"></div>
+              <p>My item [[item.id]]</p>
+            </paper-material>
+
+            <!-- Swipe left action -->
+            <div id="list-left-action" swipe-left-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+              <iron-icon icon="delete"></iron-icon>
+              <paper-ripple></paper-ripple>
+            </div>
+
+            <!-- Swipe right action -->
+            <div id="list-right-action" swipe-right-action swipe-fade on-tap="onActionTaped">
+              <iron-icon icon="archive"></iron-icon>
+              <paper-ripple></paper-ripple>
+            </div>
+
+          </swipe-action>
+        </template>
+      </iron-list>
+
+      <h3>&lt;template is="dom-repeat"&gt; demo</h3>
+      <div class="grid-example-container">
+        <template is="dom-repeat" items="{{lessItems}}">
+          <swipe-action class="square" scroll-direction="none" on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled" on-swipe-rubber-band-limit="onSwipeRubberBandMax">
+
+            <!-- Actual list item -->
+            <paper-material class="item">
+              <div class="avatar"></div>
+              <p>My item [[item.id]]</p>
+            </paper-material>
+
+            <!-- Swipe left action -->
+            <div id="grid-left-action" swipe-left-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+              Left swipe
+              <br/>
+              Tap to reset
+              <paper-ripple></paper-ripple>
+            </div>
+
+            <!-- Swipe right action -->
+            <div id="grid-right-action" swipe-right-action swipe-fade on-tap="onActionTaped">
+              Right swipe
+              <br/>
+              Tap to reset
+              <paper-ripple></paper-ripple>
+            </div>
+
+             <!-- Swipe up action -->
+            <div id="grid-up-action" swipe-up-action swipe-size="100" swipe-rubber-band="50" on-tap="onActionTaped">
+              Up swipe
+              <br/>
+              Tap to reset
+              <paper-ripple></paper-ripple>
+            </div>
+
+            <!-- Swipe down action -->
+            <div id="grid-down-action" swipe-down-action swipe-fade on-tap="onActionTaped">
+              Down swipe
+              <br/>
+              Tap to reset
+              <paper-ripple></paper-ripple>
+            </div>
+
+          </swipe-action>
+        </template>
+      </div>
+
+      <h3>gallery demo</h3>
+      <a href="gallery.html">Demo</a>
+
+    </template>
+
+  </div>
+
+  <script>
+    function createItems(itemCount) {
+      var items = [];
+      for (var i=0; i<itemCount; i++) {
+        items.push({'id':i, 'activatedActionId':undefined});
+      }
+      return items;
+    }
+
+    var demo = document.querySelector('#demo');
+    demo.items = createItems(100);
+    demo.lessItems = createItems(20);
+
+    demo.onSwipedAwaySimplestExample = function(e) {
+      console.log('Swiped our simplest example.', e.detail.action.id);
+      console.log('Event detail:', e.detail);
+    };
+
+    demo.onSwipeCanceledSimplestExample = function(e) {
+      console.log('Swiped canceled on our simplest example.', e.detail.action.id);
+      console.log('Event detail:', e.detail);
+    };
+
+    demo.onSwipedAway = function(e) {
+      console.log('Item ', e.model.item, ' has been swiped away ' + e.detail.action.id);
+      console.log('Event detail:', e.detail);
+    };
+
+    demo.onSwipeCanceled = function(e) {
+      console.log('Item ', e.model.item, '\'s ' + e.detail.action.id + ' swipe has been canceled');
+      console.log('Event detail:', e.detail);
+    };
+
+    demo.onSwipeRubberBandMax = function(e) {
+      console.log('Item ', e.model.item, '\'s ' + e.detail.action.id + ' still being swipped, maximum ruber band effect reached');
+      console.log('Event detail:', e.detail);
+    };
+
+    demo.onActionTaped = function(e) {
+      var target = e.target;
+      while (target.parentNode.localName != 'swipe-action') {
+        target = target.parentNode;
+      }
+      console.log('Swipe action \'' + target.getAttribute('id') + '\' has been taped, let\'s reset the swiped item!');
+      target.parentElement.reset(true);
+    };
+
+    demo.onTriggerLeftActionWithoutSwipe = function(e) {
+      triggerActionWithoutSwipe(e, Polymer.SwipeAction.ACTION_LEFT);
+    };
+
+    demo.onTriggerRightActionWithoutSwipe = function(e) {
+      triggerActionWithoutSwipe(e, Polymer.SwipeAction.ACTION_RIGHT);
+    };
+
+    triggerActionWithoutSwipe = function(e, actionId) {
+      var parentSwipeActionElement = e.target;
+      while (parentSwipeActionElement.localName != 'swipe-action') {
+        parentSwipeActionElement = parentSwipeActionElement.parentNode;
+      }
+      console.log('Triggering the "' + actionId + '" action without swiping');
+      parentSwipeActionElement.activateAction(actionId, true);
+    };
+  </script>
+
+</body>
+</html>
