@@ -668,8 +668,9 @@ Attribute | Description | Default
           // Removing inline styles
           Polymer.Base.transform('', this.target);
           this.target.style.opacity = '';
-          // Removing state classes
-          Polymer.dom(this.target).classList.remove('snap-back', 'animated', 'fade');
+          // Removing state classes (multiple calls to avoid IE bug)
+          var classList = Polymer.dom(this.target).classList;
+          classList.remove('snap-back'); classList.remove('animated'); classList.remove('fade');
         }
         // Actually set the value
         this._setActivatedAction(action);
