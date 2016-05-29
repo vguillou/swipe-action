@@ -4,7 +4,7 @@
 
 _An element providing a declarative way to swipe DOM elements, display underlay while doing so and trigger some action when the swiping is done. Integrates seemlessly with the &lt;iron-list&gt; element._
 
-![](https://https://github.com/vguillou/swipe-action/blob/master/res/swipe-action.gif)
+<img src="https://github.com/vguillou/swipe-action/blob/master/res/swipe-action.gif" width="300">
 
 ## Use it in your project :
 
