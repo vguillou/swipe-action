@@ -4,7 +4,7 @@
   "authors": [
     "Vincent Guillou <vin.guillou@gmail.com>"
   ],
-  "description": "An element providing a declarative way to swipe DOM elements, display underlay while doing so and trigger some action when the swiping is done.",
+  "description": "An element providing a declarative way to swipe DOM elements, display underlay and trigger some action when the swiping is done.",
   "main": [
     "swipe-action.html"
   ],
