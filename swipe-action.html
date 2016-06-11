@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../mutation-observer-behavior/mutation-observer-behavior.html">
 <!--
 A Polymer element providing a declarative way to swipe DOM elements, display underlay while doing so and trigger some action when the swiping is done.
 Integrates seamlessly with the &lt;iron-list&gt; element.
@@ -237,20 +238,7 @@ Attribute | Description | Default
           type: Boolean,
           value: false,
           reflectToAttribute: true,
-          observer: '_updateScrollDirection'
-        },
-
-        /**
-         * The swipe target node will only allow to scroll horizontally by default (along the `x` axis).
-         * It is possible to override this by setting this property, with one of `x`, `y`, `none`, or `all`.
-         * If you only need to swipe horizontally, it is recommended to keep this property set to `y`,
-         * and if you only need to swipe vertically, to `x`.
-         * You can also refer to https://www.polymer-project.org/1.0/docs/devguide/gesture-events for more informations.
-         */
-        scrollDirection: {
-          type: String,
-          value: 'y',
-          observer: '_updateScrollDirection'
+          observer: '_refreshActions'
         },
 
         /**
@@ -341,29 +329,31 @@ Attribute | Description | Default
         }
       },
 
-      listeners: {
-        'irons-resize': '_onResize'
-      },
+      behaviors: [
+        Polymer.IronResizableBehavior,
+        Polymer.MutationObserverBehavior
+      ],
 
-      get _actionsMap() {
-        var actionsMap = {};
-        // Build a model for every action declared in the light DOM
-        this.getContentChildren('#actions').forEach(function(el) {
-          this._ACTIONS_CONFIG.forEach(function(config) {
-            if (el.hasAttribute(config.attr)) {
-              actionsMap[config.id] = this._actionFactory(config.id, el);
-            }
-          }, this);
-        }, this);
-        return actionsMap;
+      listeners: {
+        'iron-resize': '_onResize',
+        'dom-mutation': '_refreshActions'
       },
 
       ready: function() {
+        // mutation observer setup
+        this._mutationOptions = {childList: true, subtree: true, attributes: true, characterData: false,
+          attributeFilter: this._ACTIONS_CONFIG.map(
+            function(config) {return config.attr;})
+        };
+        this._mutationFilter = function(mutation) {
+          return this._mutationIsChildList(mutation, this.$.actions) ||
+            this._mutationIsChildAttributes(mutation, this.$.actions);
+        };
+
         this.target = this.$.swipeTarget;
         this.listen(this.target, 'track', '_onTrack');
         this.listen(this.target, 'transitionend', '_onTransitionEnd');
-        this._updateScrollDirection();
-        this._measureTarget();
+        this._refreshActions();
       },
 
       detached: function() {
@@ -400,8 +390,7 @@ Attribute | Description | Default
         if (activatedId === toActivateId) {
           // Already activated => nothing to do
           return;
-        }
-        else if (!toActivateId && activatedId) {
+        } else if (!toActivateId && activatedId) {
           // No action to activate, let's just reset the one currently activated
           this.reset(animate);
         } else {
@@ -429,7 +418,7 @@ Attribute | Description | Default
       },
 
       _onActivatedActionIdChange: function(newValue, oldValue) {
-        if (newValue !== oldValue && !this._activatedActionIdAlreadyChanged) {
+        if (!this._activatedActionIdAlreadyChanged) {
           if (!newValue) {
             this.reset(false);
           } else {
@@ -440,7 +429,34 @@ Attribute | Description | Default
       },
 
       _onResize: function() {
-        this._measureTarget();
+        this.debounce('_refreshActions', this._refreshActions, 100);
+      },
+
+      _refreshActions: function() {
+        if (this.target && this._ACTIONS_CONFIG) {
+          // Cache the size of the swipeable node.
+          this._targetHeight = this.target.offsetHeight;
+          this._targetWidth = this.target.offsetWidth;
+
+          var action, map = {}, canSwipeX = false, canSwipeY = false;
+          // Build a model for every action declared in the light DOM
+          this.getContentChildren('#actions').forEach(function(el) {
+            this._ACTIONS_CONFIG.forEach(function(config) {
+              if (el.hasAttribute(config.attr)) {
+                action = this._actionFactory(config.id, el);
+                map[config.id] = action;
+                canSwipeX = canSwipeX || action.axis === 'x';
+                canSwipeY = canSwipeY || action.axis === 'y';
+              }
+            }, this);
+          }, this);
+          this._actionsMap = map;
+
+          // Computing which scroll direction(s) is/are allowed
+          this.setScrollDirection(
+            this.gestureDisabled || (!canSwipeX && !canSwipeY) ? 'all' :
+            (!canSwipeX ? 'x' : (!canSwipeY ? 'y' : 'none')), this.target);
+        }
       },
 
       _actionFactory: function(actionId, actionNode) {
@@ -462,13 +478,6 @@ Attribute | Description | Default
           (actionId === Polymer.SwipeAction.ACTION_LEFT || actionId === Polymer.SwipeAction.ACTION_UP) ? -1 : 1);
       },
 
-      /**
-       * Computes the swiping direction
-       */
-      _getSwipingDirection: function(e, axis) {
-        return e.detail['d' + axis] > 0 ? 1 : -1;
-      },
-
       _getActionId: function(axis, direction) {
         if (direction > 0) {
           return axis === 'x' ? Polymer.SwipeAction.ACTION_RIGHT : Polymer.SwipeAction.ACTION_DOWN;
@@ -477,16 +486,11 @@ Attribute | Description | Default
         }
       },
 
-      _updateScrollDirection: function() {
-        this.setScrollDirection(this.gestureDisabled ? 'all' : this.scrollDirection, this.target);
-      },
-
       /**
-       * Cache the size of the swipeable node.
+       * Computes the swiping direction
        */
-      _measureTarget: function() {
-        this._targetHeight = this.target.offsetHeight;
-        this._targetWidth = this.target.offsetWidth;
+      _getSwipingDirection: function(e, axis) {
+        return e.detail['d' + axis] > 0 ? 1 : -1;
       },
 
       /**
@@ -589,12 +593,11 @@ Attribute | Description | Default
        */
       _updateActions: function(axis, direction) {
         var actionId = this._getActionId(axis, direction);
-        var actionsMap = this._actionsMap;
         // Get the Action matching the action identifier
-        this._currentAction = actionsMap[actionId];
+        this._currentAction = this._actionsMap[actionId];
         // Toggle visibility for the resolved action
-        for (actionId in actionsMap) {
-          Polymer.dom(actionsMap[actionId].node).classList.remove('visible-action');
+        for (actionId in this._actionsMap) {
+          Polymer.dom(this._actionsMap[actionId].node).classList.remove('visible-action');
         }
         if (this._currentAction) {
           Polymer.dom(this._currentAction.node).classList.add('visible-action');

@@ -177,7 +177,7 @@
       </swipe-action>
 
       <h3>A different action for every direction</h3>
-      <swipe-action class="simple-example" scroll-direction="none" on-swiped-away="onSwipedAwaySimplestExample" on-swipe-canceled="onSwipeCanceledSimplestExample">
+      <swipe-action class="simple-example" on-swiped-away="onSwipedAwaySimplestExample" on-swipe-canceled="onSwipeCanceledSimplestExample">
         <!-- Actual item to be swiped -->
         <paper-material class="simple-example-swipe-target">
           Swipe me!
@@ -306,7 +306,7 @@
       <h3>&lt;template is="dom-repeat"&gt; demo</h3>
       <div class="grid-example-container">
         <template is="dom-repeat" items="{{lessItems}}">
-          <swipe-action class="square" scroll-direction="none" on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled" on-swipe-rubber-band-limit="onSwipeRubberBandMax">
+          <swipe-action class="square" on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled" on-swipe-rubber-band-limit="onSwipeRubberBandMax">
 
             <!-- Actual list item -->
             <paper-material class="item">

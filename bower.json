@@ -34,7 +34,8 @@
   "homepage": "https://vguillou.github.io/webcomponents/swipe-action",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
-    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.0"
+    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.0",
+    "mutation-observer-behavior": "vguillou/mutation-observer-behavior#^1.0.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

@@ -58,7 +58,7 @@
 
     <div id="images-container">
       <template is="dom-repeat" items="{{images}}">
-        <swipe-action scroll-direction="x" on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled">
+        <swipe-action on-swiped-away="onSwipedAway" on-swipe-canceled="onSwipeCanceled">
 
           <!-- Actual image -->
           <img src="../res/rotheneuf.jpg" alt="Les rochers sculptés de Rothéneuf" draggable="false">
