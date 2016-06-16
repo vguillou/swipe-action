@@ -75,6 +75,7 @@ Attribute | Description | Default
         z-index: 1001;
       }
 
+      #swipeTarget,
       :host > ::content > * {
         position: absolute;
         box-sizing: border-box;
@@ -419,6 +420,7 @@ Attribute | Description | Default
 
       _onActivatedActionIdChange: function(newValue, oldValue) {
         if (!this._activatedActionIdAlreadyChanged) {
+          this._mutationObserverPaused = true;
           if (!newValue) {
             this.reset(false);
           } else {
@@ -518,6 +520,7 @@ Attribute | Description | Default
       },
 
       _swipeStart: function(e) {
+        this._mutationObserverPaused = true;
         // Set the swipe axis when starting: it must not change once set for the current swipe
         this._gesture = {axis: Math.abs(e.detail.dx) > Math.abs(e.detail.dy) ? 'x' : 'y'};
         var oppositeAxis = this._gesture.axis ==='x' ? 'y' : 'x';
@@ -535,6 +538,7 @@ Attribute | Description | Default
           return;
         }
         // Translate to element
+        this.target.style.willChange = 'transform';
         this._applyGestureTranslation(e.detail['d' + this._gesture.axis], this._gesture.axis);
       },
 
@@ -661,6 +665,8 @@ Attribute | Description | Default
           // Fire cancelation event
           this.fire('swipe-canceled', {action: this._currentAction, gesture: this._gesture});
         }
+        this.target.style.willChange = '';
+        this._mutationObserverPaused = false;
       },
 
       _changeActivatedAction: function(action) {
