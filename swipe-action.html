@@ -278,7 +278,8 @@ Attribute | Description | Default
          * The ID of the activated action. One of `Polymer.SwipeAction.ACTION_LEFT`,
          * `Polymer.SwipeAction.ACTION_RIGHT`, `Polymer.SwipeAction.ACTION_UP`, `Polymer.SwipeAction.ACTION_DOWN`
          *
-         * Setting this property will activate/deactivate action(s) but without any animation.
+         * Setting this property will activate/deactivate action(s) but without any animation,
+         * and without triggering any event.
          * Bind this property to your model when using `iron-list` to persist the activated action.
          *
          * If you want to programmatically activate/deactivate an action, take a look at
@@ -420,7 +421,9 @@ Attribute | Description | Default
       _onActivatedActionIdChange: function(newValue, oldValue) {
         if (!this._activatedActionIdAlreadyChanged) {
           this._mutationObserverPaused = true;
+          this._mute = 1;
           if (!newValue) {
+            this._mute++;
             this.reset(false);
           } else {
             this.activateAction(newValue, false);
@@ -654,7 +657,7 @@ Attribute | Description | Default
           this._willBeSwipedAway = false;
           this._changeActivatedAction(this._currentAction);
           // Fire activation event
-          this.fire('swiped-away', {action: this._currentAction, gesture: this._gesture});
+          this._fireEvent('swiped-away');
           return;
         }
         // If the target node won't be swiped away, then it will be snaped back,
@@ -662,12 +665,21 @@ Attribute | Description | Default
         else if (Polymer.dom(this.target).classList.contains('snap-back')) {
           this._changeActivatedAction(undefined);
           // Fire cancelation event
-          this.fire('swipe-canceled', {action: this._currentAction, gesture: this._gesture});
+          this._fireEvent('swipe-canceled');
         }
-        this.target.style.willChange = '';
-        this._mutationObserverPaused = false;
+        // Cleanup to do AFTER the event is fired
+        this._mute--;
       },
 
+      _fireEvent: function(eventName) {
+        if (!this._mute) {
+          this.fire(eventName, {action: this._currentAction, gesture: this._gesture});
+        }
+      },
+
+      /**
+       * Do change the activatedAction after a swipe or when set programmatically.
+       */
       _changeActivatedAction: function(action) {
         var actionId = action ? action.id : undefined;
         // Set the `activatedActionId` property accordingly 
@@ -689,7 +701,9 @@ Attribute | Description | Default
         this._setActivatedAction(action);
         // Set correct values to bindable attributes and do some cleanup
         this.target.style.transition = '';
+        this.target.style.willChange = '';
         this._gesture = undefined;
+        this._mutationObserverPaused = false;
         this._setIsSwipedAway(!!action);
         this._setIsSwiping(false);
       },
@@ -746,7 +760,7 @@ Attribute | Description | Default
           // Fire an event when reaching the limit of the rubber band effect
           if (!this._currentAction.maxRubberBandReached) {
             this._currentAction.maxRubberBandReached = true;
-            this.fire('swipe-rubber-band-limit', {action: this._currentAction, gesture: this._gesture});
+            this._fireEvent('swipe-rubber-band-limit');
           }
           return this._gesture.direction * (this._currentAction.size + this._currentAction.rubberBand);
         }
