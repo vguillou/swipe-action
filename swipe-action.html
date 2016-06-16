@@ -473,7 +473,7 @@ Attribute | Description | Default
         return new Action(
           actionId,
           actionNode,
-          sizeAttr || (actionId === Polymer.SwipeAction.ACTION_UP || actionId === Polymer.SwipeAction.ACTION_DOWN) ? this._targetHeight : this._targetWidth,
+          sizeAttr || ((actionId === Polymer.SwipeAction.ACTION_UP || actionId === Polymer.SwipeAction.ACTION_DOWN) ? this._targetHeight : this._targetWidth),
           sizeAttr,
           isNaN(rubberBandAttr) ? 60 : rubberBandAttr,
           fadeAttr || fadeAttr === '',
