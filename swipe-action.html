@@ -340,6 +340,9 @@ Attribute | Description | Default
         'dom-mutation': '_refreshActions'
       },
 
+      _actionsMap: {},
+      _mute: 0,
+
       ready: function() {
         // mutation observer setup
         this._mutationOptions = {childList: true, subtree: true, attributes: true, characterData: false,
@@ -423,7 +426,6 @@ Attribute | Description | Default
           this._mutationObserverPaused = true;
           this._mute = 1;
           if (!newValue) {
-            this._mute++;
             this.reset(false);
           } else {
             this.activateAction(newValue, false);
@@ -460,6 +462,11 @@ Attribute | Description | Default
           this.setScrollDirection(
             this.gestureDisabled || (!canSwipeX && !canSwipeY) ? 'all' :
             (!canSwipeX ? 'x' : (!canSwipeY ? 'y' : 'none')), this.target);
+
+          // Update the this.activatedActionId since the this._actionsMap updated
+          if (this.activatedActionId) {
+            this._onActivatedActionIdChange(this.activatedActionId, this.activatedActionId);
+          }
         }
       },
 
@@ -561,8 +568,11 @@ Attribute | Description | Default
         // Translate
         this._applyGestureTranslation(track, this._gesture.axis);
         // Fade it as well if it is required
-        if (this._currentAction.fade) {
+        if (this._currentAction && this._currentAction.fade) {
           this.target.style.opacity = 1 - (Math.abs(track) / this._currentAction.size);
+        }
+        else {
+          this.target.style.opacity = 1;
         }
       },
 
@@ -571,18 +581,18 @@ Attribute | Description | Default
         var transition;
         // If exactly swiped away (tracked futher than the size of the action, without rubberBandAttr effect),
         // we don't need any transition
-        if (absTranslation >= this._currentAction.size && !this._currentAction.rubberBand) {
+        if (this._currentAction && absTranslation >= this._currentAction.size && !this._currentAction.rubberBand) {
           transition = '';
         }
         // Swipe the item all the way if it was fast.
-        else if (absTranslation < this._currentAction.size && (this._gesture.lastDelta * this._gesture.direction) > this._SWIPE_SPEED_THREASHOLD) {
+        else if (this._currentAction && absTranslation < this._currentAction.size && (this._gesture.lastDelta * this._gesture.direction) > this._SWIPE_SPEED_THREASHOLD) {
           transition = 'all ';
           transition += Math.floor(Math.min(200,
             (this._currentAction.size - absTranslation) / (this._gesture.lastDelta * this._gesture.direction) * this._gesture.lastDeltaDuration));
           transition += 'ms linear';
         }
         // Slide all the way off (left/right) if we're 50% total size
-        else if (absTranslation >= this._currentAction.size / 2) {
+        else if (this._currentAction && absTranslation >= this._currentAction.size / 2) {
           transition = this._SWIPE_TRANSITION;
         }
         // Swipe not confirmed, the swipe target should snap back
@@ -611,6 +621,9 @@ Attribute | Description | Default
       },
 
       _swipeAway: function(action, transition) {
+        if(!action) {
+          return;
+        }
         this.target.style.transition = transition;
         this._willBeSwipedAway = true;
         // Apply CSS transformations
@@ -668,7 +681,7 @@ Attribute | Description | Default
           this._fireEvent('swipe-canceled');
         }
         // Cleanup to do AFTER the event is fired
-        this._mute--;
+        this._mute = this._mute>0 ? this._mute-1 : 0;
       },
 
       _fireEvent: function(eventName) {
@@ -722,7 +735,9 @@ Attribute | Description | Default
       _applyGestureTranslation: function(track, axis) {
         var translation = track;
         // Transform the translation to apply the 'rubber band' effect if requested
-        if (!this._currentAction.rubberBand || this._currentAction.fade) {
+        if (!this._currentAction) {
+          translation = 0;
+        } else if (!this._currentAction.rubberBand || this._currentAction.fade) {
           translation = this._currentAction.direction * Math.min(Math.abs(translation), this._currentAction.size);
         } else {
           translation = this._applyRubberBand(translation);
@@ -738,6 +753,9 @@ Attribute | Description | Default
        * If the limit is reached, fire the approriate event.
        */
       _applyRubberBand: function(track) {
+        if (!this._currentAction) {
+          return;
+        }
         var absTrack = Math.abs(track);
         // The rubber band effect spans at least 3.5 times the rubber band area size
         var rubberBandTrackLength = Math.max(
