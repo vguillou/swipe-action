@@ -735,7 +735,9 @@ Attribute | Description | Default
       _applyGestureTranslation: function(track, axis) {
         var translation = track;
         // Transform the translation to apply the 'rubber band' effect if requested
-        if (!this._currentAction || !this._currentAction.rubberBand || this._currentAction.fade) {
+        if (!this._currentAction) {
+          translation = 0;
+        } else if (!this._currentAction.rubberBand || this._currentAction.fade) {
           translation = this._currentAction.direction * Math.min(Math.abs(translation), this._currentAction.size);
         } else {
           translation = this._applyRubberBand(translation);
