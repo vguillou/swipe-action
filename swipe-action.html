@@ -340,6 +340,9 @@ Attribute | Description | Default
         'dom-mutation': '_refreshActions'
       },
 
+      _actionsMap = {},
+      _mute = 0,
+
       ready: function() {
         // mutation observer setup
         this._mutationOptions = {childList: true, subtree: true, attributes: true, characterData: false,
@@ -459,6 +462,11 @@ Attribute | Description | Default
           this.setScrollDirection(
             this.gestureDisabled || (!canSwipeX && !canSwipeY) ? 'all' :
             (!canSwipeX ? 'x' : (!canSwipeY ? 'y' : 'none')), this.target);
+
+          // Update the this.activatedActionId since the this._actionsMap updated
+          if (this.activatedActionId) {
+            this._onActivatedActionIdChange(this.activatedActionId, this.activatedActionId);
+          }
         }
       },
 
