@@ -423,7 +423,6 @@ Attribute | Description | Default
           this._mutationObserverPaused = true;
           this._mute = 1;
           if (!newValue) {
-            this._mute++;
             this.reset(false);
           } else {
             this.activateAction(newValue, false);
@@ -668,7 +667,7 @@ Attribute | Description | Default
           this._fireEvent('swipe-canceled');
         }
         // Cleanup to do AFTER the event is fired
-        this._mute--;
+        this._mute = this._mute>0 ? this._mute-1 : 0;
       },
 
       _fireEvent: function(eventName) {
